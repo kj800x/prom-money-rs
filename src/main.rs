@@ -47,6 +47,7 @@ fn main() {
     let client = reqwest::blocking::Client::new();
 
     loop {
+        println!("Hi Suruu...");
         println!("Fetching accounts...");
         let response: Response = client
             .get(format!(

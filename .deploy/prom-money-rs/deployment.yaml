@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prom-money-rs
+  namespace: home-sensors
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: prom-money-rs
+  template:
+    metadata:
+      labels:
+        app: prom-money-rs
+    spec:
+      imagePullSecrets:
+        - name: ghcr-kj800x
+      containers:
+        - name: prom-money-rs
+          image: ghcr.io/kj800x/prom-money-rs:commit-$SHA
+          command: ["prom-money-rs"]
+          env:
+            - name: YNAB_BUDGET_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ynab-api-credentials
+                  key: YNAB_BUDGET_ID
+            - name: YNAB_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ynab-api-credentials
+                  key: YNAB_API_KEY
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          workingDir: "/usr/src/prom-money-rs"
